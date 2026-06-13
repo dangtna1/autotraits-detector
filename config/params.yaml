@@ -1,0 +1,57 @@
+# Configuration for standalone training / evaluation / inference.
+# Any path starting with './' is resolved relative to the project root
+# (the directory that contains this 'config/' folder).
+
+datasets:
+  train_dataset_name: 'fruit_train_dataset'
+  test_dataset_name: 'fruit_test_dataset'
+  validation_dataset_name: 'fruit_validation_dataset'
+  # Only used if settings.download_assets is true
+  dataset_train_annotation_url: ''
+  dataset_train_images_url: ''
+  dataset_test_annotation_url: ''
+  dataset_test_images_url: ''
+
+files:
+  # Path to a pretrained model to start training from. Leave empty to start
+  # from the ImageNet-pretrained backbone defined by config_file.
+  pretrained_model_file: ''
+  # Path to the model weights used for inference / loaded after training.
+  model_file: './model/model_final.pth'
+  # Detectron2 model zoo config (architecture)
+  config_file: 'COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
+  test_metadata_catalog_file: './data/dataset_catalogs/test_metadata_catalog.pkl'
+  train_dataset_catalog_file: './data/dataset_catalogs/train_dataset_catalog.pkl'
+  train_annotation_file: './data/train/annotations/instances.json'
+  test_annotation_file: './data/test/annotations/instances.json'
+  validation_annotation_file: './data/val/annotations/instances.json'
+  model_url: ''
+  meta_catalog_url: ''
+  train_catalog_url: ''
+
+directories:
+  train_image_dir: './data/train/images/'
+  test_image_dir: './data/test/images/'
+  validation_image_dir: './data/val/images/'
+  training_output_dir: './data/training_output/'
+  prediction_output_dir: './data/prediction_output/'
+  prediction_json_dir: './data/prediction_output/annotations/'
+
+training:
+  epochs: 10000          # SOLVER.MAX_ITER
+  number_of_classes: 3   # e.g. ripe, unripe, flower
+  optimizer: 'SGD'        # 'SGD' or 'ADAM'
+  learning_rate: 0.0025
+
+settings:
+  download_assets: false    # download model/datasets from the URLs above
+  rename_pred_images: false # rename predicted images to img_000001.png style
+  segm_masks: true
+  bbox: false
+  show_orientation: false   # PCA-based orientation estimation (strawberry/tomato specific)
+  fruit_type: 'strawberry'  # used only for orientation estimation; set 'tomato' otherwise
+  validation_period: 500    # iterations between validation runs during training
+  confidence_threshold: 0.5 # discard predictions with score below this value
+  filename_patterns:
+    rgb: "image"
+    depth: "depth"
