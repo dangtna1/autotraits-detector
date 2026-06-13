@@ -8,7 +8,6 @@ import numpy
 from detectron2.config import get_cfg
 from detectron2.engine.defaults import DefaultPredictor
 from detectron2 import model_zoo
-from detectron_predictor.json_writer.pycococreator.pycococreatortools.fruit_orientation import FruitTypes
 
 # project imports
 from detectron_predictor.visualizer.aoc_visualizer import AOCVisualizer, ColorMode
@@ -40,7 +39,6 @@ class DetectronPredictor(LearnerPredictor):
         self.epochs                 = config_data['training']['epochs']
         self.download_assets        = config_data['settings']['download_assets']
         self.rename_pred_images     = config_data['settings']['rename_pred_images']
-        self.show_orientation       = config_data['settings']['show_orientation']
         self.bbox                   = config_data['settings']['bbox']
         self.masks                  = config_data['settings']['segm_masks']
         self.list_category_ids      = list()
@@ -100,7 +98,7 @@ class DetectronPredictor(LearnerPredictor):
             raise Exception(e)
         return data
     
-    def get_rgb_predictions_image(self, rgb_image, output_json_file_path='',prediction_output_dir='',image_file_name='',sample_no=1,fruit_type=FruitTypes.Strawberry):
+    def get_rgb_predictions_image(self, rgb_image, output_json_file_path='',prediction_output_dir='',image_file_name='',sample_no=1):
         rgb_image = rgb_image[:, :, :3].astype(np.uint8)
         image_size = rgb_image.shape
         image_size = tuple(reversed(image_size[:-1]))
@@ -122,8 +120,6 @@ class DetectronPredictor(LearnerPredictor):
                                     category_ids=self.list_category_ids,
                                     masks=self.masks,
                                     bbox=self.bbox,
-                                    show_orientation=self.show_orientation,
-                                    fruit_type=fruit_type
                                     )
             start_time = datetime.now()
             drawn_predictions = vis_aoc.draw_instance_predictions(predictions)
@@ -157,7 +153,7 @@ class DetectronPredictor(LearnerPredictor):
             if(__debug__): print(traceback.format_exc())
             raise Exception(e)
 
-    def get_predictions_image(self, rgbd_image,output_json_file_path='',prediction_output_dir='',image_file_name='',sample_no=1,fruit_type=FruitTypes.Strawberry):
+    def get_predictions_image(self, rgbd_image,output_json_file_path='',prediction_output_dir='',image_file_name='',sample_no=1):
 
         depth_image = rgbd_image[:, :, 3]
         rgb_image = rgbd_image[:, :, :3].astype(np.uint8)
@@ -181,8 +177,6 @@ class DetectronPredictor(LearnerPredictor):
                                     category_ids=self.list_category_ids,
                                     masks=self.masks,
                                     bbox=self.bbox,
-                                    show_orientation=self.show_orientation,
-                                    fruit_type=fruit_type
                                     )
             start_time = datetime.now()
             drawn_predictions = vis_aoc.draw_instance_predictions(predictions)
@@ -218,7 +212,7 @@ class DetectronPredictor(LearnerPredictor):
             if(__debug__): print(traceback.format_exc())
             raise Exception(e)
 
-    def get_predictions_message(self, rgbd_image, image_id=0,fruit_type=FruitTypes.Strawberry):
+    def get_predictions_message(self, rgbd_image, image_id=0):
         depth_image = rgbd_image[:, :, 3]
         rgb_image = rgbd_image[:, :, :3].astype(np.uint8)
         output_json_file_path=''
@@ -242,13 +236,11 @@ class DetectronPredictor(LearnerPredictor):
                                     colours=self.colours,
                                     category_ids=self.list_category_ids,
                                     masks=self.masks,
-                                    show_orientation=False,   # UZ: Set to false
-                                    fruit_type=fruit_type,
                                     )
             drawn_predictions = vis_aoc.draw_instance_predictions(predictions)
             predicted_image = drawn_predictions.get_image()[:, :, ::-1].copy()
             depth_masks, rgb_masks = self.get_masks(predicted_image, rgb_image, depth_image)
-            json_writer = JSONWriter(rgb_image, self.metadata[0],fruit_type)
+            json_writer = JSONWriter(rgb_image, self.metadata[0])
             categories_info = self.metadata[1]  # category info is saved as second list
             predicted_json_ann = json_writer.create_prediction_json(predictions, output_json_file_path,
                                                                     image_file_name, categories_info, image_size, image_id, save_json_file)
@@ -257,7 +249,7 @@ class DetectronPredictor(LearnerPredictor):
             logging.error(e)
             raise Exception(e)
     
-    def get_predictions_message_short(self, rgbd_image, image_id=0,fruit_type=FruitTypes.Strawberry):
+    def get_predictions_message_short(self, rgbd_image, image_id=0):
         rgb_image = rgbd_image[:, :, :3].astype(np.uint8)
         output_json_file_path=''
         image_size=rgb_image.shape
@@ -273,7 +265,7 @@ class DetectronPredictor(LearnerPredictor):
             indices = keep.nonzero(as_tuple=True)[0]  # Get valid indices
             predictions = predictions[indices]
 
-            json_writer = JSONWriter(rgb_image, self.metadata[0], fruit_type)
+            json_writer = JSONWriter(rgb_image, self.metadata[0])
             categories_info = self.metadata[1]  # category info is saved as second list
             predicted_json_ann = json_writer.create_prediction_json(predictions, output_json_file_path,
                                                                     image_file_name, categories_info, image_size, image_id, save_json_file)

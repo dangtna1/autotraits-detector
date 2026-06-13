@@ -1,12 +1,14 @@
 # Core dependencies for training / evaluation / inference.
-# Install torch/torchvision matching your CUDA version first, e.g.:
-#   pip install torch==2.0.0 torchvision==0.15.1 --index-url https://download.pytorch.org/whl/cu118
-torch==2.0.0
-torchvision==0.15.1
+# Install torch/torchvision matching your CUDA version first, e.g. (CUDA 12.1):
+#   pip install torch==2.3.1 torchvision==0.18.1 --index-url https://download.pytorch.org/whl/cu121
+torch==2.3.1
+torchvision==0.18.1
 
-# Detectron2 (no official PyPI wheel for all platforms - install from source/git):
-#   pip install 'git+https://github.com/facebookresearch/detectron2.git'
+# Detectron2 (no official PyPI wheel - building from source requires MSVC on Windows).
+# On Windows, use prebuilt wheels matching the torch/CUDA version above:
+#   pip install detectron2 --extra-index-url https://miropsota.github.io/torch_packages_builder
 
+# numpy must stay <1.27 for scipy/pycocotools compatibility; torchvision may pull in numpy 2.x, reinstall after:
 numpy==1.24.2
 opencv-python==4.10.0.84
 pycocotools==2.0.8

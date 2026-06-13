@@ -2,11 +2,9 @@
 Started by: Usman Zahidi (uz) {16/02/22}
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
 import matplotlib.colors as mplc
-from ..json_writer.pycococreator.pycococreatortools.fruit_orientation import FruitOrientation, FruitTypes
 
 # detectron2 imports
 from detectron2.utils.visualizer import Visualizer,ColorMode,VisImage
@@ -15,15 +13,13 @@ _SMALL_OBJECT_AREA_THRESH = 1000
 
 class AOCVisualizer(Visualizer):
 
-    def __init__(self, img_rgb, metadata=None, scale=1.0, instance_mode=ColorMode.SEGMENTATION,colours=None,category_ids=None,masks=None,bbox=None,show_orientation=False,fruit_type=FruitTypes.Strawberry):
+    def __init__(self, img_rgb, metadata=None, scale=1.0, instance_mode=ColorMode.SEGMENTATION,colours=None,category_ids=None,masks=None,bbox=None):
         super(AOCVisualizer,self).__init__(img_rgb, metadata, scale, instance_mode)
 
         self.category_ids = category_ids
         self.colours = colours
         self.bbox=bbox
         self.masks=masks
-        self.show_orientation=show_orientation
-        self.fruit_type=fruit_type
         if masks:
             self.alpha = 1.0
         else:
@@ -38,8 +34,6 @@ class AOCVisualizer(Visualizer):
         keypoints=None,
         assigned_colors=None,
         alpha=0.0,
-        orientation_method=None,
-        fruit_type=None
     )->VisImage:
         """
         uz: overrided function to customize masks as per AOC requirements i.e. json
@@ -110,13 +104,7 @@ class AOCVisualizer(Visualizer):
             if masks is not None:
                 for segment in masks[i].polygons:
                     mask=segment.reshape(-1, 2)
-                    theta, centroid,vector,vector2 = FruitOrientation.get_angle_pca(masks[i].mask,self.fruit_type)
-                    height, width = masks[i].mask.shape  # Get mask dimensions
-                    if (self.show_orientation):
-                        scale_factor = min(width, height) / 1500
-                        x,y=centroid
-                        radius = int(10 * scale_factor)
-                        self.draw_polygon(mask, color, alpha=self.alpha,x=x,y=y,radius=radius,theta=theta,scale_factor=scale_factor,vector=vector)
+                    self.draw_polygon(mask, color, alpha=self.alpha)
 
             if labels is not None:
                 # first get a box
@@ -167,7 +155,7 @@ class AOCVisualizer(Visualizer):
                 self.draw_and_connect_keypoints(keypoints_per_instance)
         return self.output
 
-    def draw_polygon(self, segment, color, edge_color=None, alpha=0.5,x=0,y=0,radius=0.0,theta=0.0,scale_factor=1.0,vector=None)->VisImage:
+    def draw_polygon(self, segment, color, edge_color=None, alpha=0.5)->VisImage:
         """
         uz: overrided function to change alpha and remove outline colouring unnecessary code
 
@@ -196,15 +184,5 @@ class AOCVisualizer(Visualizer):
         if (self.masks):
             self.output.ax.add_patch(polygon)
 
-        if (self.show_orientation):
-            arrow_length = int(30 * scale_factor)
-            #draw principal vector (yellow, bgr)
-            figure=plt.Arrow(x, y, vector[0],vector[1], width=5.0,facecolor = (0.0,1.0,1.0),alpha=1.0)
-            self.output.ax.add_patch(figure)
-            # draw y-axis vector
-            figure = plt.Arrow(x, y, 0, arrow_length, width=5.0, facecolor=(1.0, 0.0, 0.0), alpha=1.0)
-            self.output.ax.add_patch(figure)
-            # annotate angle text
-            self.output.ax.text(x, y, str(np.around(theta,2)), fontsize=10)
         return self.output
 

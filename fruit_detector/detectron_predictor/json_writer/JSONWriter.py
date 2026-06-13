@@ -10,7 +10,6 @@ import matplotlib.figure as mplfigure
 import torch
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from .pycococreator.pycococreatortools import pycococreatortools
-from .pycococreator.pycococreatortools.fruit_orientation import FruitTypes
 
 #detectron imports
 from detectron2.data import MetadataCatalog
@@ -97,7 +96,7 @@ class JSONWriter(Visualizer):
     """
 
     annotation_id=1
-    def __init__(self,img_rgb,metadata=None, fruit_type=FruitTypes.Strawberry,scale=1.0, instance_mode=ColorMode.IMAGE):
+    def __init__(self,img_rgb,metadata=None,scale=1.0, instance_mode=ColorMode.IMAGE):
         super(JSONWriter, self).__init__(img_rgb, metadata, scale, instance_mode)
         """
         Args:
@@ -121,7 +120,6 @@ class JSONWriter(Visualizer):
             np.sqrt(self.output.height * self.output.width) // 90, 10 // scale
         )
         self._instance_mode = instance_mode
-        self.fruit_type=fruit_type
 
     def create_prediction_json(self, predictions, output_json_file_path,input_file_names,categories_info,image_size,image_id=1,save_json_file=False):
 
@@ -133,7 +131,7 @@ class JSONWriter(Visualizer):
 
 
         # UZ: if input filename is string (only one name) then make it list
-        ann_list, conf_list, orientation_list = [], [], []
+        ann_list, conf_list = [], []
         if type(input_file_names) is str:
             str_holder=input_file_names
             input_file_names=list()
@@ -149,7 +147,6 @@ class JSONWriter(Visualizer):
                     "images": image_list,
                     "annotations": ann_list,
                     "confidence": conf_list,
-                    "orientation": orientation_list,
                     **dict_category
                 }
                 return json_output_dict
@@ -159,15 +156,14 @@ class JSONWriter(Visualizer):
                 image_id_string = str(image_id)
             image_list.append(pycococreatortools.create_image_info(image_id,filename,
             [self.output.height,self.output.width],datetime.datetime.utcnow().isoformat(' ')))
-            ann_list,conf_list,orientation_list=self._convert_instance_predictions_to_annotations(predictions, input_file_name,
+            ann_list,conf_list=self._convert_instance_predictions_to_annotations(predictions, input_file_name,
                                                            output_json_file_path,image_size,image_id)
             image_id += 1
         dict_images         ={"images": image_list}
         dict_annotations    ={"annotations": ann_list}
         dict_confidence     = {"confidence": conf_list}
-        dict_orientation    = {"orientation": orientation_list}
-        
-        json_output_dict = {**dict_info, **dict_license, **dict_images,**dict_annotations,**dict_confidence,**dict_orientation,**dict_category}
+
+        json_output_dict = {**dict_info, **dict_license, **dict_images,**dict_annotations,**dict_confidence,**dict_category}
         # UZ: call self._write_to_file for dumping to file
         if __debug__ or save_json_file:
             self._write_to_file(output_json_file_path, json_output_dict)
@@ -235,7 +231,6 @@ class JSONWriter(Visualizer):
 
         ann_list= list()
         conf_list=list()
-        orientation_list = list()
         num_instances = None
         if boxes is not None:
             boxes = self._convert_boxes(boxes)
@@ -283,12 +278,9 @@ class JSONWriter(Visualizer):
                     image_size, True, 0)
                 confidence_info = pycococreatortools.create_confidence_info(
                     self.annotation_id, image_id, category_info,label)
-                orientation_info = pycococreatortools.create_orientation_info(
-                    self.annotation_id, image_id, category_info, segment,self.fruit_type)
 
                 ann_list.append(annotation_info)
                 conf_list.append(confidence_info)
-                orientation_list.append(orientation_info)
                 self.annotation_id +=1
                 index+=1
 
@@ -340,4 +332,4 @@ class JSONWriter(Visualizer):
                     horizontal_alignment=horiz_align,
                     font_size=font_size,
                 )
-        return ann_list,conf_list,orientation_list
+        return ann_list,conf_list

@@ -44,8 +44,6 @@ Edit `config/params.yaml`:
 - `training.learning_rate`, `training.optimizer` (`SGD` or `ADAM`)
 - `files.config_file` - Detectron2 model zoo config (architecture/backbone)
 - `files.pretrained_model_file` - optional checkpoint to fine-tune from
-- `settings.fruit_type` - only affects the optional PCA-based orientation
-  estimate (`strawberry`/`tomato`); irrelevant if `show_orientation: false`
 
 Any path starting with `./` is resolved relative to this project's root.
 

@@ -29,7 +29,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fru
 
 from utils.utils import load_config
 from detectron_predictor.detectron_predictor import DetectronPredictor
-from detectron_predictor.json_writer.pycococreator.pycococreatortools.fruit_orientation import FruitTypes
 
 
 def main():
@@ -45,9 +44,6 @@ def main():
 
     rgb_pattern = config_data['settings']['filename_patterns']['rgb']
     depth_pattern = config_data['settings']['filename_patterns']['depth']
-
-    fruit_type_name = config_data['settings']['fruit_type'].upper()
-    fruit_type = FruitTypes.Tomato if fruit_type_name == 'TOMATO' else FruitTypes.Strawberry
 
     if prediction_json_dir:
         os.makedirs(prediction_json_dir, exist_ok=True)
@@ -80,12 +76,12 @@ def main():
                 rgbd_image = np.dstack((rgb_image, depth_image))
                 predictor.get_predictions_image(
                     rgbd_image, prediction_json_output_file, prediction_output_dir,
-                    image_file_name, sample_no, fruit_type)
+                    image_file_name, sample_no)
             else:
                 rgb_image = cv2.imread(image_file_name)
                 predictor.get_rgb_predictions_image(
                     rgb_image, prediction_json_output_file, prediction_output_dir,
-                    image_file_name, sample_no, fruit_type)
+                    image_file_name, sample_no)
         except Exception as e:
             logging.error(e)
             print(traceback.format_exc())

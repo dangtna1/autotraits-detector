@@ -48,8 +48,6 @@ settings:
   rename_pred_images: false # rename predicted images to img_000001.png style
   segm_masks: true
   bbox: false
-  show_orientation: false   # PCA-based orientation estimation (strawberry/tomato specific)
-  fruit_type: 'strawberry'  # used only for orientation estimation; set 'tomato' otherwise
   validation_period: 500    # iterations between validation runs during training
   confidence_threshold: 0.5 # discard predictions with score below this value
   filename_patterns:
