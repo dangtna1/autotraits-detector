@@ -8,8 +8,9 @@ torchvision==0.18.1
 # On Windows, use prebuilt wheels matching the torch/CUDA version above:
 #   pip install detectron2 --extra-index-url https://miropsota.github.io/torch_packages_builder
 
-# numpy must stay <1.27 for scipy/pycocotools compatibility; torchvision may pull in numpy 2.x, reinstall after:
-numpy==1.24.2
+# numpy must stay <1.24 since detectron2 0.6's masks.py uses the removed np.bool alias;
+# torchvision may pull in numpy 2.x, reinstall this pin after:
+numpy==1.23.5
 opencv-python==4.10.0.84
 pycocotools==2.0.8
 scikit-image==0.24.0
